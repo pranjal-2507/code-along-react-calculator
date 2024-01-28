@@ -1,133 +1,101 @@
-/* eslint-disable no-unused-vars */
-import { useReducer } from "react";
-import React from "react";
-import "./Calculator.css";
+import { useState, useEffect } from "react";
+import Display from './Display';
+import "./Calculator.css"
 
-const initState = {
-  input: "",
-  res: "",
-};
-let operators = ["+", "-", "/", "*"];
-function reducer(state = initState, { type, payload }) {
-  switch (type) {
-    case "ADDINP": {
-      let addOps = true;
-      if (
-        operators.includes(payload) &&
-        operators.includes(
-          state.input.slice(state.input.length - 1, state.input.length)
-        )
-      ) {
-        addOps = false;
-      } else {
-        addOps = true;
-      }
+let Keys = () => {
+  const [name, setName] = useState("");
 
-      if (addOps) {
-        console.log({ ...state, input: state.input + payload });
-        return { ...state, input: state.input + payload };
-      }
-      return { ...state };
-    }
-    case "CLEAR": {
-      return { ...state, input: "", res: "" };
-    }
-    case "CALCULATE": {
-      const inplen = state.input.length;
-      if (!operators.includes(state.input.slice(inplen - 1, inplen))) {
-        try {
-          const result = eval(state.input);
-          if (!Number.isFinite(result)) {
-            throw new error("cannot divide by zero");
-          }
-          const newInp = {
-            ...state,
-            res: "",
-            input: result.toString(),
-          };
-          return newInp;
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        return {
-          ...state,
-          input: eval(state.input.slice(0, inplen - 1)).toString(),
-          res: "",
-        };
-      }
-    }
-    case "DELETE": {
-      return {
-        ...state,
-        input: state.input.slice(0, state.input.length - 1),
-      };
-    }
-    default: {
-      return state;
-    }
-  }
-}
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      const key = event.key;
 
-const Calculator = () => {
-  const [state, dispatch] = useReducer(reducer, initState);
-  let handleClick = (val) => {
-    dispatch({ type: "ADDINP", payload: val });
+      if ((key >= '0' && key <= '9') || 
+      key === '+' || key === '-' || 
+      key === '*' || key === '/' || 
+      key === '.') {
+        handleButtonClick(key);
+      } else if (key === 'Enter') {
+        handleEvaluate();
+      } else if (key === 'Backspace') {
+        handleDelete();
+      } else if (key.toLowerCase() === 'c') {
+        handleAllclear();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
+
+  const handleButtonClick = (value) => {
+    setName((prevName) => prevName + value);
   };
-  let handleClear = () => {
-    dispatch({ type: "CLEAR" });
+
+  const handleAllclear = () => {
+    setName("");
   };
-  let handleCal = () => {
-    dispatch({ type: "CALCULATE" });
+
+  const handleDelete = () => {
+    setName((prevName) => prevName.slice(0, -1));
   };
-  let handleDel = () => {
-    dispatch({ type: "DELETE" });
+
+  const handleEvaluate = () => {
+    setName(eval(name).toString());
+  };
+
+  const handleClick = (e) => {
+    handleButtonClick(e.target.value);
   };
 
   return (
     <>
-      <div id="calculator">
-        <div className="dis">
-          <p className="input"></p>
-          <p className="result">{state.input}</p>
+    <div className="main">
+      <div className="output"><Display name={name} /></div>
+      <div className="keypad">
+        <div className="three-buttons">
+        <div className="a">
+          <button className="ac" onClick={handleAllclear}>AC</button>
+          <button className="del" onClick={handleDelete}>DEL</button>
+          <button className="equal" onClick={handleEvaluate}>=</button>
         </div>
-        <div id="display">
-          <div id="keys">
-            <button className="operator" onClick={() => handleClick("+")}>
-              +
-            </button>
-            <button onClick={() => handleClick("7")}>7</button>
-            <button onClick={() => handleClick("8")}>8</button>
-            <button onClick={() => handleClick("9")}>9</button>
-            <button onClick={() => handleClick("-")} className="operator">
-              -
-            </button>
-            <button onClick={() => handleClick("4")}>4</button>
-            <button onClick={() => handleClick("5")}>5</button>
-            <button onClick={() => handleClick("6")}>6</button>
-            <button onClick={() => handleClick("x")} className="operator">
-              x
-            </button>
-            <button onClick={() => handleClick("1")}>1</button>
-            <button onClick={() => handleClick("2")}>2</button>
-            <button onClick={() => handleClick("3")}>3</button>
-            <button onClick={() => handleClick("/")} className="operator">
-              /
-            </button>
-            <button onClick={() => handleClick("0")}>0</button>
-            <button>.</button>
-            <button onClick={handleCal}>=</button>
-          </div>
-          <button onClick={handleDel} id="clear">
-            C
-          </button>
-          <button onClick={handleClear} id="allClear">
-            AC
-          </button>
         </div>
+
+        <div className="four-buttons">
+        <div className="b">
+          <button className="buttons" onClick={handleClick} value="7">7</button>
+          <button className="buttons" onClick={handleClick} value="8">8</button>
+          <button className="buttons" onClick={handleClick} value="9">9</button>
+          <button className="buttons" onClick={handleClick} value="/">/</button>
+        </div>
+
+        <div className="c">
+          <button className="buttons" onClick={handleClick} value="4">4</button>
+          <button className="buttons" onClick={handleClick} value="5">5</button>
+          <button className="buttons" onClick={handleClick} value="6">6</button>
+          <button className="buttons" onClick={handleClick} value="*">*</button>
+        </div>
+
+        <div className="d">
+          <button className="buttons" onClick={handleClick} value="1">1</button>
+          <button className="buttons" onClick={handleClick} value="2">2</button>
+          <button className="buttons" onClick={handleClick} value="3">3</button>
+          <button className="buttons" onClick={handleClick} value="-">-</button>
+        </div>
+
+        <div className="e">
+          <button className="buttons" onClick={handleClick} value="0">0</button>
+          <button className="buttons" onClick={handleClick} value=".">.</button>
+          <button className="buttons" onClick={handleClick} value="+">+</button>
+          <button className="buttons" onClick={handleClick} value="%">%</button>
+        </div>
+        </div>
+      </div>
       </div>
     </>
   );
 };
 
-export default Calculator;
+export default Keys;
